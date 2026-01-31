@@ -1,6 +1,7 @@
 package dev.madlador;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -96,36 +97,40 @@ class State {
         System.out.println("edge");
         Utils.print(occupied);
 
-        ArrayList<Integer> obis = new ArrayList<>();
-        long occupiedCopy = occupied;
-        for (int i = 0; i < 49; i++) {
-            long res = occupiedCopy & 1L;
-            if (res > 0) obis.add(i);
-            occupiedCopy = occupiedCopy >> 1;
-        }
-        System.out.println(obis);
-
         // idea: for each occupied bit index, do call outline func, and merge results
         // good enough for now
 
         long allOccupiedOutline = 0L;
-        for (int bi : obis) {
+        for (int bi : getAllBitIndexes(occupied)) {
             allOccupiedOutline |= getOutlineMask(bi);
         }
 
         // exclude that one available that leads to dead end, and also all occupied
-        Utils.print(allOccupiedOutline ^ occupied ^ available);
+
+        long multiPath = allOccupiedOutline ^ occupied ^ available;
+        Utils.print(multiPath);
 
 
         // todo: now last step pretty much is to pick the shortest path sort of
 
         // pick a path that is closer to the lmi (last move index)
 
+        int[][] graph = new int[7][7];
+        for (int bi : getAllBitIndexes(multiPath)) graph[bi / 7][bi % 7] = 1;
 
 
 
 
+    }
 
+
+    private List<Integer> getAllBitIndexes(long bitboard) {
+        ArrayList<Integer> obis = new ArrayList<>();
+        for (int i = 0; i < 49; i++) {
+            if ((bitboard & 1L) > 0) obis.add(i);
+            bitboard >>= 1;
+        }
+        return obis;
     }
 
 
