@@ -27,7 +27,7 @@ public class Main {
         State s0 = States.place(new Move(0, 1));
         States.dump(s0);
 
-        State s1 = States.place(s0, new Move(0, 2));
+        State s1 = States.place(s0, new Move(0, 8));
         States.dump(s1);
 
 
