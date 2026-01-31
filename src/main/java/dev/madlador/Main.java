@@ -6,22 +6,32 @@ public class Main {
     public static void main(String[] args) {
 
 
-        StateO state = new StateO();
-        state.occupy(0, 2);
-        state.occupy(0, 3);
-        state.occupy(1, 3);
-        state.occupy(1, 2);
-        state.occupy(2, 3);
-        state.occupy(3, 2);
-        state.occupy(2, 1);
-        state.occupy(1, 1);
-        state.occupy(1, 0);
-        state.occupy(0, 0);
+//        StateO state = new StateO();
+//        state.occupy(0, 2);
+//        state.occupy(0, 3);
+//        state.occupy(1, 3);
+//        state.occupy(1, 2);
+//        state.occupy(2, 3);
+//        state.occupy(3, 2);
+//        state.occupy(2, 1);
+//        state.occupy(1, 1);
+//        state.occupy(1, 0);
+//        state.occupy(0, 0);
+//
+//
+//        System.out.println(state);
+//
+//        state.getNextValidMoves();
 
 
-        System.out.println(state);
+        State s0 = States.place(new Move(0, 1));
+        States.dump(s0);
 
-        state.getNextValidMoves();
+        State s1 = States.place(s0, new Move(0, 2));
+        States.dump(s1);
+
+
+
 
 
     }
