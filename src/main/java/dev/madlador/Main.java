@@ -114,13 +114,89 @@ class State {
         // todo: now last step pretty much is to pick the shortest path sort of
 
         // pick a path that is closer to the lmi (last move index)
-
-        int[][] graph = new int[7][7];
-        for (int bi : getAllBitIndexes(multiPath)) graph[bi / 7][bi % 7] = 1;
-
-
+        int[][] multiPathGrid = bitboardToGrid(multiPath);
+        Utils.printGrid(multiPathGrid);
+        Utils.printNumberedGrid(multiPathGrid);
 
 
+        int[][] graph = new int[49][49];
+
+        int[][] orthogonal = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int[][] diagonal = new int[][]{{-1, -1}, {1, 1}, {1, -1}, {-1, 1}};
+
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 7; j++) {
+
+                if (multiPathGrid[i][j] == 1) {
+
+                    // orthogonal strictly
+                    boolean isOrt = false;
+                    for (int k = 0; k < orthogonal.length; k++) {
+
+                        int ci = i + orthogonal[k][0];
+                        int cj = j + orthogonal[k][1];
+
+                        // check bounds
+                        if (ci < 0 || ci >= 7 || cj < 0 || cj >= 7) continue;
+
+                        int nbr = multiPathGrid[ci][cj];
+                        if (nbr == 1) {
+                            isOrt = true;
+
+                            int org = i * 7 + j;
+                            int dst = ci * 7 + cj;
+                            graph[org][dst] = 1;
+                        }
+                    }
+
+                    if (isOrt) continue;
+
+                    // diagonal strictly
+                    for (int k = 0; k < diagonal.length; k++) {
+
+                        int ci = i + diagonal[k][0];
+                        int cj = j + diagonal[k][1];
+
+                        // check bounds
+                        if (ci < 0 || ci >= 7 || cj < 0 || cj >= 7) continue;
+
+                        int nbr = multiPathGrid[ci][cj];
+                        if (nbr == 1) {
+                            int org = i * 7 + j;
+                            int dst = ci * 7 + cj;
+                            graph[org][dst] = 1;
+                        }
+                    }
+
+
+                }
+            }
+        }
+
+
+
+//        List<List<Integer>> paths = Utils.findAllPaths(graph, 14, 4);
+//
+//        for (List<Integer> path : paths) {
+//            System.out.println(path);
+//        }
+
+
+
+    }
+
+
+    private int[][] bitboardToGrid(long bitboard) {
+        int[][] grid = new int[7][7];
+        for (int bi : getAllBitIndexes(bitboard)) grid[bi / 7][bi % 7] = 1;
+        return grid;
+    }
+
+
+    private double distance(int x1, int y1, int x2, int y2) {
+        double x = x2 - x1;
+        double y = y2 - y1;
+        return Math.sqrt(x * x + y * y);
     }
 
 
@@ -213,4 +289,39 @@ class Utils {
 
         System.out.println(sb.append("\u001B[38;0m"));
     }
+
+
+    public static void printGrid(int[][] grid) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 7; i++) {
+            for (int j = 0; j < 7; j++) {
+                if (grid[i][j] == 1) {
+                    sb.append("🟩");
+                } else {
+                    sb.append("⬜");
+                }
+                sb.append(" ");
+            }
+            sb.append("\n");
+        }
+        System.out.println(sb);
+    }
+
+    public static void printNumberedGrid(int[][] grid) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                int n = i * grid.length + j;
+                if (n < 10) sb.append(" ");
+                sb.append(n).append(" ");
+            }
+            sb.append("\n");
+        }
+
+        System.out.println(sb);
+    }
+
+
+
 }
