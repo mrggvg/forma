@@ -6,8 +6,10 @@ import java.util.List;
 public class Engine {
 
     private static final long[] OUTLINES = new long[49];
+    private static final long[][] WIN_MASKS = new long[49][];
 
     static {
+        // Precomputing outlines
         for (int i = 0; i < 49; i++) {
             int row = i / 7;
             int col = i % 7;
@@ -24,9 +26,60 @@ public class Engine {
             }
             OUTLINES[i] = mask;
         }
+
+        // Precomputing win masks
+        for (int i = 0; i < 49; i++) {
+            int row = i / 7;
+            int col = i % 7;
+            List<Long> masks = new ArrayList<>();
+
+            int[][] directions = {
+                    {0, 1},   // horizontal
+                    {1, 0},   // vertical
+                    {1, 1},   // diagonal down-right
+                    {1, -1},  // diagonal down-left
+            };
+
+            for (int[] dir : directions) {
+                long line = 0L;
+                // Walk forward
+                for (int step = 0; step < 7; step++) {
+                    int r = row + dir[0] * step;
+                    int c = col + dir[1] * step;
+                    if (r < 0 || r > 6 || c < 0 || c > 6) break;
+                    line |= 1L << (r * 7 + c);
+                }
+                // Walk backward
+                for (int step = 1; step < 7; step++) {
+                    int r = row - dir[0] * step;
+                    int c = col - dir[1] * step;
+                    if (r < 0 || r > 6 || c < 0 || c > 6) break;
+                    line |= 1L << (r * 7 + c);
+                }
+
+                // Slide a window of 4 along the line
+                List<Integer> indices = new ArrayList<>();
+                for (int b = 0; b < 49; b++) {
+                    if ((line & (1L << b)) != 0) indices.add(b);
+                }
+
+                for (int start = 0; start <= indices.size() - 4; start++) {
+                    long window = 0L;
+                    boolean containsI = false;
+                    for (int w = 0; w < 4; w++) {
+                        int idx = indices.get(start + w);
+                        window |= 1L << idx;
+                        if (idx == i) containsI = true;
+                    }
+                    if (containsI) masks.add(window);
+                }
+            }
+
+            WIN_MASKS[i] = masks.stream().mapToLong(Long::longValue).toArray();
+        }
     }
 
-    public List<Move> legalMoves(State state) {
+    public List<Move> moves(State state) {
         int lastMoveIndex = state.getLastMoveIndex();
 
         // If board is empty we can play any move
@@ -55,6 +108,38 @@ public class Engine {
         return extractMoves(legalMoves);
     }
 
+    /**
+     * Evaluates the current game state.
+     * <p>
+     * Only checks the last move for a win — no earlier moves need re-checking.
+     *
+     * @param state the state to evaluate
+     * @return game outcome:
+     * <table border="1" cellpadding="4">
+     *     <tr><th>Value</th><th>Meaning</th></tr>
+     *     <tr><td>1</td><td>First player wins</td></tr>
+     *     <tr><td>2</td><td>Second player wins</td></tr>
+     *     <tr><td>-1</td><td>Stalemate (48 cells filled, no winner)</td></tr>
+     *     <tr><td>0</td><td>Game still in progress</td></tr>
+     * </table>
+     */
+    public int outcome(State state) {
+        int lastIndex = state.getLastMoveIndex();
+        if (lastIndex == -1) return 0;
+
+        long lastPlayer = state.getLastMoveBitboard();
+
+        for (long mask : WIN_MASKS[lastIndex]) {
+            if ((lastPlayer & mask) == mask) {
+                return (state.metadata() & 0x80) != 0 ? 2 : 1;
+            }
+        }
+
+        if (Long.bitCount(state.first() | state.second()) == 48) return -1;
+
+        return 0;
+    }
+
 
     private List<Move> extractMoves(long bitboard) {
         ArrayList<Move> moves = new ArrayList<>();
@@ -66,6 +151,5 @@ public class Engine {
         }
         return moves;
     }
-
 
 }
