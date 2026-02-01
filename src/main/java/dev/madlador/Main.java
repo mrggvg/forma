@@ -3,6 +3,7 @@ package dev.madlador;
 import dev.madlador.game.Engine;
 import dev.madlador.game.Move;
 import dev.madlador.game.State;
+import dev.madlador.view.App;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,18 +11,29 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) throws InterruptedException {
 
+
+
+        new App();
+
+
+
+
+    }
+
+
+    public static void benchmark() {
         Engine engine = new Engine();
 
         long start = System.currentTimeMillis();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             State state = State.emptyState();
             List<Move> moves;
 
             while (!(moves = engine.moves(state)).isEmpty()) {
                 Collections.shuffle(moves);
                 state = state.transition(moves.getFirst());
-                //state.dump();
+                state.dump();
 
                 int result = engine.outcome(state);
                 if (result != 0) {
@@ -31,16 +43,14 @@ public class Main {
 //                        case -1 -> "Stalemate!";
 //                        default -> "";
 //                    });
-                    break;
+//                    break;
                 }
-
-                //Thread.sleep(100);
             }
 
         }
 
         long end = System.currentTimeMillis();
         System.out.println("Total time: " + (end - start) + "ms");
-
     }
+
 }

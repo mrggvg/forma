@@ -16,19 +16,14 @@ public class App extends JFrame {
 
         add(new Board(), BorderLayout.CENTER);
         add(new ControlPanel(), BorderLayout.EAST);
+        add(new PlayerPanel(), BorderLayout.WEST);
 
 
         pack();
         setVisible(true);
 
 
-
-
-
-
-
     }
-
 
 
 }
