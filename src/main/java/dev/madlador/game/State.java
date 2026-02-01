@@ -1,60 +1,28 @@
 package dev.madlador.game;
 
 /**
- * Represents the immutable state of the game at a given moment.
- * <p>
- * <b>Bitboards:</b>
- * <ul>
- *     <li>{@code first}: bits set for positions occupied by the first player</li>
- *     <li>{@code second}: bits set for positions occupied by the second player</li>
- * </ul>
- * <p>
- * <b>Metadata:</b> packed into a single byte. Layout:
- * <table border="1" cellpadding="4">
- *     <tr>
- *         <th>Bit</th><th>Purpose</th>
- *     </tr>
- *     <tr>
- *         <td>7 (0x80)</td><td>Turn flag: 1 = first player's turn, 0 = second player's turn</td>
- *     </tr>
- *     <tr>
- *         <td>4–5 (0x30)</td><td>Index of the last move applied (0–48)</td>
- *     </tr>
- *     <tr>
- *         <td>0–3 (0x0F)</td><td>Unused / reserved</td>
- *     </tr>
- * </table>
+ * Immutable snapshot of the game board.
+ *
+ * @param first    bitboard of the first player's pieces
+ * @param second   bitboard of the second player's pieces
+ * @param metadata packed byte — bit 7 is the turn flag, bits 0–5 are the last move index
  */
 public record State(long first, long second, byte metadata) {
 
     /**
-     * Returns an empty initial state where no moves have been played,
-     * and it is the first player's turn.
-     *
-     * @return a new {@code State} representing an empty board
+     * Returns an empty board with the first player to move.
      */
     public static State emptyState() {
         return new State(0L, 0L, (byte) 0x80);
     }
 
     /**
-     * Returns a new {@code State} resulting from applying the given move
-     * to the specified previous state.
-     * <p>
-     * <b>Important:</b> This method does <b>not</b> validate the move against
-     * game rules. It simply applies the move to the appropriate bitboard,
-     * flips the turn bit, and updates the last move index in metadata.
-     * <p>
-     * The method:
-     * <ul>
-     *     <li>Determines which player is to move from the previous state's metadata.</li>
-     *     <li>Updates the appropriate bitboard with the move.</li>
-     *     <li>Flips the turn bit and stores the last move index in metadata.</li>
-     * </ul>
+     * Applies {@code move} to {@code previous} without validation.
+     * Sets the bit on the active player's board, flips the turn, and records the move index.
      *
-     * @param previous the previous {@code State} to apply the move to
-     * @param move     the {@code Move} to apply
-     * @return a new {@code State} representing the game after the move
+     * @param previous state before the move
+     * @param move     move to apply
+     * @return new state after the move
      */
     public static State transition(State previous, Move move) {
         long first = previous.first();
@@ -65,10 +33,45 @@ public record State(long first, long second, byte metadata) {
         long newFirst = firstToMove ? (first | moveMask) : first;
         long newSecond = firstToMove ? second : (second | moveMask);
 
-        byte nextTurnBit = (byte) (previous.metadata ^ 0x80);
-        byte metadata = (byte) (move.toBitIndex() | nextTurnBit);
+        byte nextTurnBit = (byte) (firstToMove ? 0x00 : 0x80);
+        byte metadata = (byte) ((move.toBitIndex() & 0x3F) | nextTurnBit);
 
         return new State(newFirst, newSecond, metadata);
+    }
+
+    /**
+     * Prints a colored board to stdout. The last move is highlighted in a lighter shade.
+     */
+    public void dump() {
+        final String RESET = "\u001B[38;5;0m";
+        final String BLUE = "\u001B[38;5;26m";
+        final String BLUE_LIGHT = "\u001B[38;5;51m";
+        final String MAGENTA = "\u001B[38;5;199m";
+        final String MAGENTA_LIGHT = "\u001B[38;5;219m";
+        final String TILE = "⬛ ";
+
+        int lastMoveIndex = metadata & 0x3F;
+        long lastMask = 1L << lastMoveIndex;
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < 49; i++) {
+            long mask = 1L << i;
+
+            if ((first & mask) != 0) {
+                sb.append(mask == lastMask ? MAGENTA_LIGHT : MAGENTA);
+            } else if ((second & mask) != 0) {
+                sb.append(mask == lastMask ? BLUE_LIGHT : BLUE);
+            } else {
+                sb.append(RESET);
+            }
+            sb.append(TILE);
+
+            if ((i + 1) % 7 == 0) sb.append("\n");
+        }
+
+        sb.append(RESET);
+        System.out.println(sb);
     }
 
 }

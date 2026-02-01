@@ -1,10 +1,19 @@
 package dev.madlador;
 
+import dev.madlador.game.Move;
+import dev.madlador.game.State;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
 
 
-        System.out.println(Long.bitCount(0b0010101));
+        State state = State.emptyState();
+        for (int i = 0; i < 4; i++) {
+            state.dump();
+            state = State.transition(state, new Move(i, 3));
+        }
+        state.dump();
+
 
 
     }
