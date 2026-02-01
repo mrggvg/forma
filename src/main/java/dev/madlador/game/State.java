@@ -20,20 +20,19 @@ public record State(long first, long second, byte metadata) {
      * Applies {@code move} to {@code previous} without validation.
      * Sets the bit on the active player's board, flips the turn, and records the move index.
      *
-     * @param previous state before the move
-     * @param move     move to apply
+     * @param move move to apply
      * @return new state after the move
      */
-    public static State transition(State previous, Move move) {
-        long first = previous.first();
-        long second = previous.second();
+    public State transition(Move move) {
+        long first = this.first;
+        long second = this.second;
         long moveMask = move.toMask();
 
         if (((first | second) & moveMask) != 0) {
             throw new IllegalArgumentException("Square already occupied: " + move.toBitIndex());
         }
 
-        boolean firstToMove = (previous.metadata & 0x80) != 0;
+        boolean firstToMove = (this.metadata & 0x80) != 0;
 
         long newFirst = firstToMove ? (first | moveMask) : first;
         long newSecond = firstToMove ? second : (second | moveMask);
@@ -42,6 +41,24 @@ public record State(long first, long second, byte metadata) {
         byte metadata = (byte) ((move.toBitIndex() & 0x3F) | nextTurnBit);
 
         return new State(newFirst, newSecond, metadata);
+    }
+
+    /**
+     * Extracts the last move index from {@link #metadata}.
+     *
+     * @return bit index (0–48) of the last move applied, or -1 if the board is empty
+     */
+    public int getLastMoveIndex() {
+        if ((first | second) == 0) return -1;
+        return metadata & 0x3F;
+    }
+
+    /*
+     * Returns the bitboard of the player who made the last move.
+     */
+    public long getLastMoveBitboard() {
+        if ((first | second) == 0) return 0;
+        return (metadata & 0x80) != 0 ? second : first;
     }
 
     /**

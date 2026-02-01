@@ -1,19 +1,24 @@
 package dev.madlador;
 
+import dev.madlador.game.Engine;
 import dev.madlador.game.Move;
 import dev.madlador.game.State;
 
-public class Main {
-    public static void main(String[] args) {
+import java.util.List;
 
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+
+        Engine engine = new Engine();
 
         State state = State.emptyState();
-        for (int i = 0; i < 4; i++) {
+        List<Move> moves;
+        while (!(moves = engine.legalMoves(state)).isEmpty()) {
+            state = state.transition(moves.get(0));
             state.dump();
-            state = State.transition(state, new Move(i, 3));
-        }
-        state.dump();
 
+            Thread.sleep(1000);
+        }
 
 
     }
