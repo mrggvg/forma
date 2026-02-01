@@ -19,5 +19,9 @@ public record State(long b1, long b2, int lm) {
         return turn() % 2;
     }
 
+    long lastMoveMask() {
+        return 1L << lm;
+    }
+
 }
 
