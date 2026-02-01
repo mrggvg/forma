@@ -22,7 +22,7 @@ public class Main {
                 Move move = moves.getFirst();
                 state = States.place(state, move);
 
-                Thread.sleep(100);
+                Thread.sleep(20);
             }
         }
 

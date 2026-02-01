@@ -467,8 +467,16 @@ final public class States {
                 if (hasExternalEdge(graph, n, cycleSet)) pivots.add(n);
             }
 
+            // Skip cycles with fewer than two pivots
+            if (pivots.size() < 2) {
+                System.out.println("Skipping cycle with fewer than two pivots.");
+                System.out.println("Cycle: " + Arrays.toString(cycle));
+                System.out.println("Pivots: " + pivots);
+                return;
+            }
+
+            // Now we are safe to access pivots.get(0) and pivots.get(1)
             int p1 = pivots.get(0);
-            // todo: fix bug -> Index 1 out of bounds for length 1
             int p2 = pivots.get(1);
 
             List<Integer> arc1 = getArc(cycle, p1, p2);
@@ -483,6 +491,7 @@ final public class States {
             }
         }
     }
+
 
     /**
      * Finds a cycle in the graph using DFS.
