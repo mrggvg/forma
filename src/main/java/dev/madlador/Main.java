@@ -3,29 +3,30 @@ package dev.madlador;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
 
 
-        Move[] moves = new Move[]{
-                new Move(0, 2),
-                new Move(0, 3),
-                new Move(1, 3),
-                new Move(1, 2),
-                new Move(2, 3),
-                new Move(3, 2),
-                new Move(2, 1),
-                new Move(1, 1),
-                new Move(1, 0),
-                new Move(0, 0),
-        };
+        for (int i = 0; i < 100; i++) {
 
-        State state = States.place(moves[0]);
-        for (int i = 1; i < moves.length; i++) {
-            state = States.place(state, moves[i]);
+            State state = States.place(new Move(3, 3));
+            while (true) {
+                States.dump(state);
+                List<Move> moves = States.moves(state);
+
+                if  (moves.isEmpty()) {
+                    System.out.println("Stalemate");
+                    break;
+                }
+
+                Collections.shuffle(moves);
+                Move move = moves.getFirst();
+                state = States.place(state, move);
+
+                Thread.sleep(100);
+            }
         }
 
-        States.dump(state);
-        States.moves(state);
+
 
 
     }

@@ -63,6 +63,9 @@ final public class States {
         return new State(move.toMask(), 0L, move.toBitIndex());
     }
 
+    public static boolean isStalemate(State state) {
+        return moves(state).isEmpty();
+    }
 
     /**
      * Returns all moves that can be applied to transition to the next state.
@@ -76,12 +79,24 @@ final public class States {
         long occupied = state.b1() | state.b2();
         long available = outline & ~occupied;
 
-        // Not 100% sure, but basing it on assumption that if there is more
-        // than 1, then we won't end up in a dead end state
-        if (Long.bitCount(available) > 1) return extractMoves(available);
+        if (Long.bitCount(available) > 1) {
+            List<Move> moves = extractMoves(available);
+            List<Move> valid = new ArrayList<>();
 
-        // Here need to handle that edge case
-        if (Long.bitCount(available) == 1) {
+            for (Move move : moves) {
+                long checkOutline = outlineMask(move.toBitIndex());
+                if ((checkOutline & ~occupied) != 0L) {
+                    valid.add(move);
+                }
+            }
+
+            // if filtering left us with valid moves, return them
+            if (!valid.isEmpty()) return valid;
+
+            // otherwise fall through to edge case handling below
+        }
+
+        if (Long.bitCount(available) >= 1) {
 
             // Check that there will really be dead end
             long checkOutline = outlineMask(Long.numberOfTrailingZeros(available));
@@ -91,26 +106,18 @@ final public class States {
             if (checkAvailable > 0L) return extractMoves(available);
 
             // ---------------------------------------------- edge case
-            // Now we look at that one available also as taken
-            // since we cannot go there it will take us to dead end
             occupied = occupied | available;
             long occupiedOutlined = outlineMask(getAllSetBitIndexes(occupied));
 
-            // Bitboard of all potential legal moves (but not yet)
             long candidates = occupiedOutlined ^ occupied;
 
-
-
-            // graph stuff... bellow
             int[][] graph = toGraph(toGrid(candidates));
             removeCycles(graph);
             return extractMoves(graphToBitboard(graph));
         }
 
-        // todo: tbd what to do if we reach 0
-        return null;
+        return new ArrayList<>();
     }
-
 
     private static long graphToBitboard(int[][] graph) {
         long bb = 0L;
@@ -461,6 +468,7 @@ final public class States {
             }
 
             int p1 = pivots.get(0);
+            // todo: fix bug -> Index 1 out of bounds for length 1
             int p2 = pivots.get(1);
 
             List<Integer> arc1 = getArc(cycle, p1, p2);
