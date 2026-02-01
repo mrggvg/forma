@@ -29,7 +29,7 @@ public record State(long first, long second, byte metadata) {
         long second = previous.second();
         long moveMask = move.toMask();
 
-        if ((first | second & moveMask) != 0) {
+        if (((first | second) & moveMask) != 0) {
             throw new IllegalArgumentException("Square already occupied: " + move.toBitIndex());
         }
 

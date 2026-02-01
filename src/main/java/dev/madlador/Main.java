@@ -4,7 +4,7 @@ import dev.madlador.game.Move;
 import dev.madlador.game.State;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
 
 
         State state = State.emptyState();
