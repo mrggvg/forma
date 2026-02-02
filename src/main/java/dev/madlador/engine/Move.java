@@ -1,4 +1,4 @@
-package dev.madlador.game;
+package dev.madlador.engine;
 
 public record Move(int row, int col) {
 
@@ -7,7 +7,7 @@ public record Move(int row, int col) {
             throw new IllegalArgumentException("Move out of bounds: (" + row + ", " + col + ")");
     }
 
-    int toBitIndex() {
+    public int toBitIndex() {
         return row * 7 + col;
     }
 

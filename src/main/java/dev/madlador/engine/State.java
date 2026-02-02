@@ -1,7 +1,10 @@
-package dev.madlador.game;
+package dev.madlador.engine;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Immutable snapshot of the game board.
+ * Immutable snapshot of the engine board.
  *
  * @param first    bitboard of the first player's pieces
  * @param second   bitboard of the second player's pieces
@@ -42,6 +45,27 @@ public record State(long first, long second, byte metadata) {
 
         return new State(newFirst, newSecond, metadata);
     }
+
+
+    public List<Move> getFirstPlayerMoves() {
+        return extractMoves(this.first);
+    }
+
+    public List<Move> getSecondPlayerMoves() {
+        return extractMoves(this.second);
+    }
+
+    private List<Move> extractMoves(long bitboard) {
+        ArrayList<Move> moves = new ArrayList<>();
+        for (int i = 0; i < 49; i++) {
+            if ((bitboard & 1L) > 0) {
+                moves.add(new Move(i / 7, i % 7));
+            }
+            bitboard >>= 1;
+        }
+        return moves;
+    }
+
 
     /**
      * Extracts the last move index from {@link #metadata}.

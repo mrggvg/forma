@@ -1,4 +1,4 @@
-package dev.madlador.game;
+package dev.madlador.engine;
 
 public class Utils {
 

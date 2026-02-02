@@ -1,4 +1,4 @@
-package dev.madlador.game;
+package dev.madlador.engine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,12 +109,12 @@ public class Engine {
     }
 
     /**
-     * Evaluates the current game state.
+     * Evaluates the current engine state.
      * <p>
      * Only checks the last move for a win — no earlier moves need re-checking.
      *
      * @param state the state to evaluate
-     * @return game outcome:
+     * @return engine outcome:
      * <table border="1" cellpadding="4">
      *     <tr><th>Value</th><th>Meaning</th></tr>
      *     <tr><td>1</td><td>First player wins</td></tr>
