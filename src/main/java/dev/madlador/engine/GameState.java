@@ -10,13 +10,13 @@ import java.util.List;
  * @param second   bitboard of the second player's pieces
  * @param metadata packed byte — bit 7 is the turn flag, bits 0–5 are the last move index
  */
-public record State(long first, long second, byte metadata) {
+public record GameState(long first, long second, byte metadata) {
 
     /**
      * Returns an empty board with the first player to move.
      */
-    public static State emptyState() {
-        return new State(0L, 0L, (byte) 0x80);
+    public static GameState emptyState() {
+        return new GameState(0L, 0L, (byte) 0x80);
     }
 
     /**
@@ -26,7 +26,7 @@ public record State(long first, long second, byte metadata) {
      * @param move move to apply
      * @return new state after the move
      */
-    public State transition(Move move) {
+    public GameState transition(Move move) {
         long first = this.first;
         long second = this.second;
         long moveMask = move.toMask();
@@ -43,7 +43,7 @@ public record State(long first, long second, byte metadata) {
         byte nextTurnBit = (byte) (firstToMove ? 0x00 : 0x80);
         byte metadata = (byte) ((move.toBitIndex() & 0x3F) | nextTurnBit);
 
-        return new State(newFirst, newSecond, metadata);
+        return new GameState(newFirst, newSecond, metadata);
     }
 
 

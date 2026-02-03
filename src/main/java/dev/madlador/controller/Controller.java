@@ -1,8 +1,8 @@
-package dev.madlador.controllers;
+package dev.madlador.controller;
 
 import dev.madlador.engine.Move;
-import dev.madlador.models.GameModel;
-import dev.madlador.views.AppView;
+import dev.madlador.model.GameModel;
+import dev.madlador.view.AppView;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +18,7 @@ public class Controller {
     }
 
     public void playMove(int row, int col) {
+
         this.gameModel.playMove(row, col);
 
         List<Move> moves = gameModel.getLegalMoves();

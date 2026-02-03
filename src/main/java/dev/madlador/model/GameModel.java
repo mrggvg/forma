@@ -1,8 +1,8 @@
-package dev.madlador.models;
+package dev.madlador.model;
 
 import dev.madlador.engine.Engine;
+import dev.madlador.engine.GameState;
 import dev.madlador.engine.Move;
-import dev.madlador.engine.State;
 
 import java.util.HashSet;
 import java.util.List;
@@ -13,37 +13,37 @@ public class GameModel {
     private Set<GameModelObserver> observers = new HashSet<>();
 
     private Engine engine;
-    private State state;
+    private GameState gameState;
 
     public GameModel() {
         this.engine = new Engine();
-        this.state = State.emptyState();
+        this.gameState = GameState.emptyState();
     }
 
     public void playMove(int row, int col) {
-        state = state.transition(new Move(row, col));
+        gameState = gameState.transition(new Move(row, col));
         notifyObservers();
     }
 
     public void newGame() {
-        state = State.emptyState();
+        gameState = GameState.emptyState();
         notifyObservers();
     }
 
     public List<Move> getFirstPlayerMoves() {
-        return state.getFirstPlayerMoves();
+        return gameState.getFirstPlayerMoves();
     }
 
     public List<Move> getSecondPlayerMoves() {
-        return state.getSecondPlayerMoves();
+        return gameState.getSecondPlayerMoves();
     }
 
     public List<Move> getLegalMoves() {
-        return engine.moves(state);
+        return engine.moves(gameState);
     }
 
     public int getGameOutcome() {
-        return engine.outcome(state);
+        return engine.outcome(gameState);
     }
 
     public void subscribe(GameModelObserver observer) {
@@ -58,7 +58,7 @@ public class GameModel {
         this.observers.forEach(GameModelObserver::update);
     }
 
-    public State getState() {
-        return state;
+    public GameState getState() {
+        return gameState;
     }
 }

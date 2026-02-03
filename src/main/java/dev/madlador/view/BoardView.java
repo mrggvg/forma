@@ -1,8 +1,8 @@
-package dev.madlador.views;
+package dev.madlador.view;
 
-import dev.madlador.controllers.Controller;
-import dev.madlador.models.GameModel;
-import dev.madlador.models.GameModelObserver;
+import dev.madlador.controller.Controller;
+import dev.madlador.model.GameModel;
+import dev.madlador.model.GameModelObserver;
 
 import javax.swing.*;
 import java.awt.*;

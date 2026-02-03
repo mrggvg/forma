@@ -79,13 +79,13 @@ public class Engine {
         }
     }
 
-    public List<Move> moves(State state) {
-        int lastMoveIndex = state.getLastMoveIndex();
+    public List<Move> moves(GameState gameState) {
+        int lastMoveIndex = gameState.getLastMoveIndex();
 
         // If board is empty we can play any move
         if (lastMoveIndex == -1) return extractMoves(Long.MAX_VALUE);
 
-        long occupied = state.first() | state.second();
+        long occupied = gameState.first() | gameState.second();
         long legalMoves = OUTLINES[lastMoveIndex] & ~occupied;
 
         // Return moves that are adjacent to the last move
@@ -93,7 +93,7 @@ public class Engine {
 
         // If we reach dead end, we can play next move
         // anywhere else that is adjacent to the opponent
-        long opponent = state.getLastMoveBitboard();
+        long opponent = gameState.getLastMoveBitboard();
         long opponentOutline = 0L;
 
         // todo: possible optimization here, precompute
@@ -109,11 +109,11 @@ public class Engine {
     }
 
     /**
-     * Evaluates the current engine state.
+     * Evaluates the current engine gameState.
      * <p>
      * Only checks the last move for a win — no earlier moves need re-checking.
      *
-     * @param state the state to evaluate
+     * @param gameState the gameState to evaluate
      * @return engine outcome:
      * <table border="1" cellpadding="4">
      *     <tr><th>Value</th><th>Meaning</th></tr>
@@ -123,19 +123,19 @@ public class Engine {
      *     <tr><td>0</td><td>Game still in progress</td></tr>
      * </table>
      */
-    public int outcome(State state) {
-        int lastIndex = state.getLastMoveIndex();
+    public int outcome(GameState gameState) {
+        int lastIndex = gameState.getLastMoveIndex();
         if (lastIndex == -1) return 0;
 
-        long lastPlayer = state.getLastMoveBitboard();
+        long lastPlayer = gameState.getLastMoveBitboard();
 
         for (long mask : WIN_MASKS[lastIndex]) {
             if ((lastPlayer & mask) == mask) {
-                return (state.metadata() & 0x80) != 0 ? 2 : 1;
+                return (gameState.metadata() & 0x80) != 0 ? 2 : 1;
             }
         }
 
-        if (Long.bitCount(state.first() | state.second()) == 48) return -1;
+        if (Long.bitCount(gameState.first() | gameState.second()) == 48) return -1;
 
         return 0;
     }
