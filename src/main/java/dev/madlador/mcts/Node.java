@@ -3,83 +3,157 @@ package dev.madlador.mcts;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
-public class Node {
+/**
+ * Represents a node in the Monte Carlo Tree Search tree.
+ * Each node maintains statistics (visits, value) and references to parent and children.
+ */
+class Node {
 
-    private final double C = Math.sqrt(2);
-    private int visits = 0;
-    private double value = 0;
+    private static final double DEFAULT_EXPLORATION = Math.sqrt(2);
+    private static final Random RANDOM = new Random();
 
     private final State state;
+    private final Node parent;
+    private final double explorationConstant;
 
-    private Node parent;
-    private List<Node> children = new ArrayList<>();
+    private List<Node> children;
+    private int visits;
+    private double totalValue;
+    private boolean expanded;
 
-
-    public Node(State state, Node parent) {
+    /**
+     * Creates a new node with the given state and parent.
+     *
+     * @param state the state this node represents
+     * @param parent the parent node, or null if this is the root
+     * @param explorationConstant the UCB exploration constant
+     */
+    Node(State state, Node parent, double explorationConstant) {
         this.state = state;
         this.parent = parent;
+        this.explorationConstant = explorationConstant;
+        this.children = new ArrayList<>();
+        this.visits = 0;
+        this.totalValue = 0.0;
+        this.expanded = false;
     }
 
+    /**
+     * Expands this node by creating child nodes for all legal actions.
+     *
+     * @return this node for method chaining
+     */
+    Node expand() {
+        if (expanded || state.isTerminal()) {
+            return this;
+        }
 
-
-
-    public Node expand() {
         List<Action> actions = state.getLegalActions();
         for (Action action : actions) {
-            State clone = this.state.clone();
-            clone.performAction(action);
-            this.children.add(new Node(clone, this));
+            State childState = state.clone();
+            childState.apply(action);
+            children.add(new Node(childState, this, explorationConstant));
         }
+
+        expanded = true;
         return this;
     }
 
-    private double calculateUct() {
-        return visits == 0 ? Double.MAX_VALUE : (value / visits) + C * Math.sqrt(Math.log(parent.visits) / visits);
+
+
+    /**
+     * Selects the best child using UCB1 formula.
+     *
+     * @return the child with highest UCB value
+     */
+    Node selectBestChild() {
+        return children.stream()
+                .max(Comparator.comparingDouble(this::calculateUCB))
+                .orElseThrow(() -> new IllegalStateException("No children to select from"));
     }
 
-
-
-
-
-
-
-    Node getParent() {
-        return this.parent;
+    /**
+     * Selects a random child node.
+     *
+     * @return a random child
+     */
+    Node selectRandomChild() {
+        if (children.isEmpty()) {
+            throw new IllegalStateException("No children available");
+        }
+        return children.get(RANDOM.nextInt(children.size()));
     }
 
+    /**
+     * Calculates the UCB1 (Upper Confidence Bound) value for this node.
+     *
+     * @return UCB value, or MAX_VALUE if never visited
+     */
+    private double calculateUCB(Node child) {
+        if (child.visits == 0) {
+            return Double.MAX_VALUE;
+        }
 
-    void incrementVisitsCount() {
+        double exploitation = child.totalValue / child.visits;
+        double exploration = explorationConstant * Math.sqrt(Math.log(this.visits) / child.visits);
 
+        return exploitation + exploration;
     }
 
-    void addValue(double result) {
-
+    /**
+     * Updates this node's statistics after a simulation.
+     *
+     * @param value the simulation result to backpropagate
+     */
+    void update(double value) {
+        visits++;
+        totalValue += value;
     }
+
+    /**
+     * Returns the child with the highest visit count (most promising).
+     *
+     * @return the most visited child
+     */
+    Node getMostVisitedChild() {
+        return children.stream()
+                .max(Comparator.comparingInt(Node::getVisits))
+                .orElseThrow(() -> new IllegalStateException("No children available"));
+    }
+
+    // Getters
 
     State getState() {
-        return this.state;
+        return state;
     }
 
-
-    public Node random() {
-        return null;
+    Node getParent() {
+        return parent;
     }
 
     boolean hasChildren() {
-        return false;
+        return !children.isEmpty();
     }
 
-    Node getBestChild() {
-        return children.stream().max(Comparator.comparingDouble(Node::calculateUct)).orElse(null);
-    }
-
-    boolean isSimulated() {
-        return false;
+    boolean isExpanded() {
+        return expanded;
     }
 
     boolean isTerminal() {
-        return false;
+        return state.isTerminal();
     }
 
+    int getVisits() {
+        return visits;
+    }
+
+    double getAverageValue() {
+        return visits == 0 ? 0.0 : totalValue / visits;
+    }
+
+    boolean isRoot() {
+        return parent == null;
+    }
 }
