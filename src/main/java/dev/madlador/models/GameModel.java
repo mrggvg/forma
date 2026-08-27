@@ -15,6 +15,8 @@ public class GameModel {
     private Engine engine;
     private State state;
 
+    private boolean botThinking = false;
+
     public GameModel() {
         this.engine = new Engine();
         this.state = State.emptyState();
@@ -27,6 +29,24 @@ public class GameModel {
 
     public void newGame() {
         state = State.emptyState();
+        botThinking = false;
+        notifyObservers();
+    }
+
+    /**
+     * @return {@code true} while it is the human's move — the first player is
+     * always the human, so this simply follows the turn flag
+     */
+    public boolean isHumanTurn() {
+        return state.isFirstPlayerToMove();
+    }
+
+    public boolean isBotThinking() {
+        return botThinking;
+    }
+
+    public void setBotThinking(boolean botThinking) {
+        this.botThinking = botThinking;
         notifyObservers();
     }
 

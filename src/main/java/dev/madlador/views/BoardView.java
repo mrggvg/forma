@@ -59,12 +59,14 @@ public class BoardView extends JPanel implements GameModelObserver {
             square.setPlayerState(isLast ? SquareView.PlayerState.SECOND_LAST : SquareView.PlayerState.SECOND);
         });
 
-        // Enable legal moves and mark them
-        gameModel.getLegalMoves().forEach(move -> {
-            SquareView square = squares[move.toBitIndex()];
-            square.setEnabled(true);
-            square.setLegalMove(true);
-        });
+        // Enable legal moves and mark them, but only while the human is on turn
+        if (gameModel.isHumanTurn() && gameModel.getGameOutcome() == 0) {
+            gameModel.getLegalMoves().forEach(move -> {
+                SquareView square = squares[move.toBitIndex()];
+                square.setEnabled(true);
+                square.setLegalMove(true);
+            });
+        }
 
         repaint();
     }

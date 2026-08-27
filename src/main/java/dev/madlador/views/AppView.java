@@ -13,6 +13,7 @@ public class AppView extends JFrame implements GameModelObserver {
     private Controller controller;
 
     private BoardView boardView;
+    private ControlView controlView;
 
     private JPanel overlay;
     private JLabel overlayLabel;
@@ -24,6 +25,7 @@ public class AppView extends JFrame implements GameModelObserver {
         this.gameModel.subscribe(this);
 
         this.boardView = new BoardView(controller, gameModel);
+        this.controlView = new ControlView(gameModel);
 
         setTitle("4mation");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,6 +35,7 @@ public class AppView extends JFrame implements GameModelObserver {
 
 
         add(boardView, BorderLayout.CENTER);
+        add(controlView, BorderLayout.SOUTH);
 
 
         setMinimumSize(new Dimension(380, 280));

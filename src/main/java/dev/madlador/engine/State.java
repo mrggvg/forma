@@ -68,6 +68,13 @@ public record State(long first, long second, byte metadata) {
 
 
     /**
+     * @return {@code true} if the first player is the one to move
+     */
+    public boolean isFirstPlayerToMove() {
+        return (metadata & 0x80) != 0;
+    }
+
+    /**
      * Extracts the last move index from {@link #metadata}.
      *
      * @return bit index (0–48) of the last move applied, or -1 if the board is empty
